@@ -23,6 +23,39 @@ if %errorlevel%==0 (
     )
 )
 
+where node >nul 2>nul
+if errorlevel 1 (
+    echo Node.js nao foi encontrado.
+    echo Instale o Node.js LTS em:
+    echo   https://nodejs.org/
+    echo.
+    pause
+    exit /b 1
+)
+
+where npm >nul 2>nul
+if errorlevel 1 (
+    echo npm nao foi encontrado.
+    echo Reinstale o Node.js LTS em:
+    echo   https://nodejs.org/
+    echo.
+    pause
+    exit /b 1
+)
+
+where appium >nul 2>nul
+if errorlevel 1 (
+    echo Appium nao foi encontrado.
+    echo Instale o Appium com:
+    echo   npm install -g appium
+    echo.
+    echo Site oficial:
+    echo   https://appium.io/
+    echo.
+    pause
+    exit /b 1
+)
+
 if not exist "%VENV_DIR%\Scripts\python.exe" (
     echo Criando ambiente virtual...
     call %PYTHON_EXE% -m venv "%VENV_DIR%"
@@ -32,6 +65,16 @@ if not exist "%VENV_DIR%\Scripts\python.exe" (
 echo Instalando dependencias do projeto...
 call "%VENV_DIR%\Scripts\python.exe" -m pip install --disable-pip-version-check -e "%PROJECT_ROOT%"
 if errorlevel 1 goto :fail
+
+call "%VENV_DIR%\Scripts\python.exe" -c "import emoji, appium"
+if errorlevel 1 (
+    echo.
+    echo As dependencias Python do projeto nao foram instaladas corretamente.
+    echo Tente executar o instalador novamente.
+    echo.
+    pause
+    exit /b 1
+)
 
 if not exist "%PROJECT_ROOT%\configuracao.json" (
     if exist "%PROJECT_ROOT%\configuracao.exemplo.json" (
@@ -47,7 +90,7 @@ if not exist "%PROJECT_ROOT%\configuracao.json" (
 echo.
 echo Instalacao concluida.
 echo Abra o aplicativo com um duplo clique em:
-echo   %PROJECT_ROOT%\scripts\Mensagens.bat
+echo   %PROJECT_ROOT%\USO\scripts\Mensagens.bat
 echo.
 pause
 exit /b 0

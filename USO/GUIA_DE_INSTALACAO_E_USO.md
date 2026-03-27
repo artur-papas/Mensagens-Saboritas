@@ -60,7 +60,15 @@ adb devices
 
 Opção recomendada:
 
-- dê duplo clique em [scripts/Instalar_Mensagens.bat](/C:/Users/artur/Mensagens_Saboritas/scripts/Instalar_Mensagens.bat)
+- dê duplo clique em [scripts/Instalar_Mensagens.bat](/C:/Users/artur/Mensagens_Saboritas/USO/scripts/Instalar_Mensagens.bat)
+
+O instalador verifica:
+
+- Python 3
+- Node.js
+- npm
+- Appium
+- dependências Python do projeto
 
 Opção manual:
 
@@ -75,7 +83,15 @@ Copy-Item configuracao.exemplo.json configuracao.json
 
 ### Abrir o aplicativo
 
-- dê duplo clique em [scripts/Mensagens.bat](/C:/Users/artur/Mensagens_Saboritas/scripts/Mensagens.bat)
+- dê duplo clique em [scripts/Mensagens.bat](/C:/Users/artur/Mensagens_Saboritas/USO/scripts/Mensagens.bat)
+
+Antes de abrir, o script verifica:
+
+- existência do `.venv`
+- dependências Python do projeto
+- Node.js
+- npm
+- Appium
 
 Ou:
 
@@ -87,7 +103,7 @@ Ou:
 
 Para atualizar o projeto a partir da branch `main` no GitHub:
 
-- dê duplo clique em [scripts/Atualizar_Codigo.bat](/C:/Users/artur/Mensagens_Saboritas/scripts/Atualizar_Codigo.bat)
+- dê duplo clique em [scripts/Atualizar_Codigo.bat](/C:/Users/artur/Mensagens_Saboritas/USO/scripts/Atualizar_Codigo.bat)
 
 O script:
 
@@ -99,7 +115,7 @@ O script:
 
 Se o update trouxer mudanças de dependências, execute depois:
 
-- [scripts/Instalar_Mensagens.bat](/C:/Users/artur/Mensagens_Saboritas/scripts/Instalar_Mensagens.bat)
+- [scripts/Instalar_Mensagens.bat](/C:/Users/artur/Mensagens_Saboritas/USO/scripts/Instalar_Mensagens.bat)
 
 ### Antes de usar
 

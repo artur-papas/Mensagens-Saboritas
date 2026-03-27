@@ -1,14 +1,15 @@
 # Mensagens Saboritas
 
-Guia principal para instalação e uso em português:
+Documentação em português:
 
-- [GUIA_DE_INSTALACAO_E_USO.md](/C:/Users/artur/Mensagens_Saboritas/GUIA_DE_INSTALACAO_E_USO.md)
+- [USO/README.md](/C:/Users/artur/Mensagens_Saboritas/USO/README.md)
+- [USO/GUIA_DE_INSTALACAO_E_USO.md](/C:/Users/artur/Mensagens_Saboritas/USO/GUIA_DE_INSTALACAO_E_USO.md)
 
-Arquivos principais para o usuário:
+Scripts em português:
 
-- instalar: [scripts/Instalar_Mensagens.bat](/C:/Users/artur/Mensagens_Saboritas/scripts/Instalar_Mensagens.bat)
-- abrir: [scripts/Mensagens.bat](/C:/Users/artur/Mensagens_Saboritas/scripts/Mensagens.bat)
-- atualizar: [scripts/Atualizar_Codigo.bat](/C:/Users/artur/Mensagens_Saboritas/scripts/Atualizar_Codigo.bat)
+- instalar: [USO/scripts/Instalar_Mensagens.bat](/C:/Users/artur/Mensagens_Saboritas/USO/scripts/Instalar_Mensagens.bat)
+- abrir: [USO/scripts/Mensagens.bat](/C:/Users/artur/Mensagens_Saboritas/USO/scripts/Mensagens.bat)
+- atualizar: [USO/scripts/Atualizar_Codigo.bat](/C:/Users/artur/Mensagens_Saboritas/USO/scripts/Atualizar_Codigo.bat)
 - configuração de exemplo: [configuracao.exemplo.json](/C:/Users/artur/Mensagens_Saboritas/configuracao.exemplo.json)
 - configuração ativa: `configuracao.json`
 
