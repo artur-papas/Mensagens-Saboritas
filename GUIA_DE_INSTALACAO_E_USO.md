@@ -83,6 +83,24 @@ Ou:
 .venv\Scripts\python.exe scripts\launcher.py
 ```
 
+### Atualizar o código
+
+Para atualizar o projeto a partir da branch `main` no GitHub:
+
+- dê duplo clique em [scripts/Atualizar_Codigo.bat](/C:/Users/artur/Mensagens_Saboritas/scripts/Atualizar_Codigo.bat)
+
+O script:
+
+- confirma que esta pasta é um repositório Git
+- confirma que a branch atual é `main`
+- recusa atualizar se houver alterações locais
+- executa `git fetch origin main`
+- executa `git pull --ff-only origin main`
+
+Se o update trouxer mudanças de dependências, execute depois:
+
+- [scripts/Instalar_Mensagens.bat](/C:/Users/artur/Mensagens_Saboritas/scripts/Instalar_Mensagens.bat)
+
 ### Antes de usar
 
 - deixe o aparelho desbloqueado
