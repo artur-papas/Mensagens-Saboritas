@@ -62,6 +62,15 @@ if not exist "%VENV_DIR%\Scripts\python.exe" (
     if errorlevel 1 goto :fail
 )
 
+call "%VENV_DIR%\Scripts\python.exe" --version >nul 2>nul
+if errorlevel 1 (
+    echo O ambiente virtual existente esta quebrado ou aponta para um Python antigo.
+    echo Recriando o ambiente com o Python atual...
+    rmdir /s /q "%VENV_DIR%"
+    call %PYTHON_EXE% -m venv "%VENV_DIR%"
+    if errorlevel 1 goto :fail
+)
+
 echo Instalando dependencias do projeto...
 call "%VENV_DIR%\Scripts\python.exe" -m pip install --disable-pip-version-check -e "%PROJECT_ROOT%"
 if errorlevel 1 goto :fail

@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import queue
 import threading
+import time
 import tkinter as tk
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -43,6 +44,10 @@ class AppUI:
         self.output_name_var = tk.StringVar(value="contatos")
         self.source_contact_var = tk.StringVar()
         self.batch_size_var = tk.IntVar(value=self.config.default_batch_size)
+        self.send_elapsed_var = tk.StringVar(value="Tempo decorrido: 00:00")
+        self.send_remaining_var = tk.StringVar(value="Tempo restante estimado: --:--")
+        self.send_progress_value = tk.DoubleVar(value=0.0)
+        self.send_started_at: float | None = None
 
         self.selected_file: Path | None = None
         self._build()
@@ -63,7 +68,7 @@ class AppUI:
         )
         ttk.Label(
             header,
-            text="Colete contatos do WhatsApp Business e encaminhe a última mensagem com mais segurança.",
+            text="Colete contatos do WhatsApp Business e encaminhe a ultima mensagem com mais seguranca.",
         ).grid(row=1, column=0, sticky="w", pady=(6, 0))
 
         notebook = ttk.Notebook(self.root)
@@ -86,11 +91,11 @@ class AppUI:
         parent.columnconfigure(0, weight=1)
         parent.columnconfigure(1, weight=1)
 
-        form = ttk.LabelFrame(parent, text="Configurações da Coleta", padding=18)
+        form = ttk.LabelFrame(parent, text="Configuracoes da Coleta", padding=18)
         form.grid(row=0, column=0, columnspan=2, sticky="ew")
         form.columnconfigure(1, weight=1)
 
-        ttk.Label(form, text="Nome do arquivo de saída").grid(row=0, column=0, sticky="w")
+        ttk.Label(form, text="Nome do arquivo de saida").grid(row=0, column=0, sticky="w")
         ttk.Entry(form, textvariable=self.output_name_var).grid(row=0, column=1, sticky="ew", padx=(12, 0))
 
         ttk.Label(form, text="Contatos bloqueados").grid(row=1, column=0, sticky="nw", pady=(12, 0))
@@ -106,7 +111,7 @@ class AppUI:
             column=0,
             sticky="w",
         )
-        ttk.Label(progress, text="Contatos únicos capturados até agora").grid(
+        ttk.Label(progress, text="Contatos unicos capturados ate agora").grid(
             row=1,
             column=0,
             sticky="w",
@@ -132,7 +137,7 @@ class AppUI:
     def _build_send_tab(self, parent: ttk.Frame) -> None:
         parent.columnconfigure(1, weight=1)
 
-        settings = ttk.LabelFrame(parent, text="Configurações do Envio", padding=18)
+        settings = ttk.LabelFrame(parent, text="Configuracoes do Envio", padding=18)
         settings.grid(row=0, column=0, columnspan=2, sticky="ew")
         settings.columnconfigure(1, weight=1)
 
@@ -150,7 +155,7 @@ class AppUI:
             padx=(12, 0),
         )
 
-        ttk.Label(settings, text=f"Contatos por lote (máximo {MAX_BATCH_SIZE})").grid(
+        ttk.Label(settings, text=f"Contatos por lote (maximo {MAX_BATCH_SIZE})").grid(
             row=2,
             column=0,
             sticky="w",
@@ -166,6 +171,7 @@ class AppUI:
 
         summary = ttk.LabelFrame(parent, text="Arquivo Selecionado", padding=18)
         summary.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(18, 0))
+        summary.columnconfigure(0, weight=1)
         ttk.Label(summary, textvariable=self.file_count_var, font=("Segoe UI", 16, "bold")).grid(
             row=0,
             column=0,
@@ -173,13 +179,22 @@ class AppUI:
         )
         ttk.Label(
             summary,
-            text="A última mensagem do contato de origem será encaminhada em lotes.",
+            text="A ultima mensagem do contato de origem sera encaminhada em lotes.",
         ).grid(row=1, column=0, sticky="w", pady=(8, 0))
 
         ttk.Label(
             summary,
-            text=f"O tamanho do lote é limitado a {MAX_BATCH_SIZE} contatos para combinar com o fluxo de encaminhamento.",
+            text=f"O tamanho do lote e limitado a {MAX_BATCH_SIZE} contatos para combinar com o fluxo de encaminhamento.",
         ).grid(row=2, column=0, sticky="w", pady=(8, 0))
+
+        ttk.Progressbar(
+            summary,
+            variable=self.send_progress_value,
+            maximum=100,
+            mode="determinate",
+        ).grid(row=3, column=0, sticky="ew", pady=(12, 0))
+        ttk.Label(summary, textvariable=self.send_elapsed_var).grid(row=4, column=0, sticky="w", pady=(8, 0))
+        ttk.Label(summary, textvariable=self.send_remaining_var).grid(row=5, column=0, sticky="w", pady=(4, 0))
 
         actions = ttk.Frame(parent)
         actions.grid(row=2, column=0, columnspan=2, sticky="e", pady=(18, 0))
@@ -206,6 +221,7 @@ class AppUI:
             elif action == "send-progress":
                 current, total = payload
                 self.file_count_var.set(f"{current} de {total} contatos processados")
+                self._update_send_progress(current, total)
             elif action == "collect-done":
                 self._set_collect_idle()
             elif action == "send-done":
@@ -223,17 +239,52 @@ class AppUI:
         raw = self.blocked_contacts_text.get("1.0", "end").strip()
         return [line.strip() for line in raw.splitlines() if line.strip()]
 
+    def _format_duration(self, seconds: float) -> str:
+        total_seconds = max(0, int(seconds))
+        minutes, secs = divmod(total_seconds, 60)
+        hours, minutes = divmod(minutes, 60)
+        if hours:
+            return f"{hours:02d}:{minutes:02d}:{secs:02d}"
+        return f"{minutes:02d}:{secs:02d}"
+
+    def _update_send_progress(self, current: int, total: int) -> None:
+        if total <= 0:
+            self.send_progress_value.set(0.0)
+            self.send_elapsed_var.set("Tempo decorrido: 00:00")
+            self.send_remaining_var.set("Tempo restante estimado: --:--")
+            return
+
+        self.send_progress_value.set((current / total) * 100)
+
+        if self.send_started_at is None or current <= 0:
+            self.send_elapsed_var.set("Tempo decorrido: 00:00")
+            self.send_remaining_var.set("Tempo restante estimado: --:--")
+            return
+
+        elapsed = time.monotonic() - self.send_started_at
+        self.send_elapsed_var.set(f"Tempo decorrido: {self._format_duration(elapsed)}")
+
+        if current >= total:
+            self.send_remaining_var.set("Tempo restante estimado: 00:00")
+            return
+
+        average_per_contact = elapsed / current
+        remaining = average_per_contact * (total - current)
+        self.send_remaining_var.set(
+            f"Tempo restante estimado: {self._format_duration(remaining)}"
+        )
+
     def start_collect(self) -> None:
         if self.scrape_state.active:
             return
         output_name = self.output_name_var.get().strip()
         if not output_name:
-            self.status_var.set("O nome do arquivo de saída é obrigatório.")
+            self.status_var.set("O nome do arquivo de saida e obrigatorio.")
             return
 
         self.config.blocked_contacts = self._blocked_contacts()
         self.collect_start_btn.config(state="disabled")
-        self.collect_pause_btn.config(state="normal", text="Pause")
+        self.collect_pause_btn.config(state="normal", text="Pausar")
         self.collect_cancel_btn.config(state="normal")
         self.scrape_count_var.set("0 contatos encontrados")
 
@@ -279,12 +330,16 @@ class AppUI:
             self.status_var.set("Selecione um CSV de contatos antes de enviar.")
             return
         if not self.source_contact_var.get().strip():
-            self.status_var.set("O contato de origem é obrigatório.")
+            self.status_var.set("O contato de origem e obrigatorio.")
             return
 
         self.send_start_btn.config(state="disabled")
-        self.send_pause_btn.config(state="normal", text="Pause")
+        self.send_pause_btn.config(state="normal", text="Pausar")
         self.send_cancel_btn.config(state="normal")
+        self.send_started_at = time.monotonic()
+        self.send_progress_value.set(0.0)
+        self.send_elapsed_var.set("Tempo decorrido: 00:00")
+        self.send_remaining_var.set("Tempo restante estimado: calculando...")
 
         def worker() -> None:
             try:
@@ -341,6 +396,9 @@ class AppUI:
         self.file_var.set(str(path))
         self.file_count_var.set(f"{count} contatos carregados")
         self.status_var.set(f"Arquivo selecionado: {path.name}.")
+        self.send_progress_value.set(0.0)
+        self.send_elapsed_var.set("Tempo decorrido: 00:00")
+        self.send_remaining_var.set("Tempo restante estimado: --:--")
 
     def _set_collect_idle(self) -> None:
         self.scrape_state.active = False
@@ -353,6 +411,11 @@ class AppUI:
         self.send_start_btn.config(state="normal")
         self.send_pause_btn.config(state="disabled", text="Pausar")
         self.send_cancel_btn.config(state="disabled")
+        if self.send_started_at is not None and self.send_progress_value.get() >= 100:
+            elapsed = time.monotonic() - self.send_started_at
+            self.send_elapsed_var.set(f"Tempo decorrido: {self._format_duration(elapsed)}")
+            self.send_remaining_var.set("Tempo restante estimado: 00:00")
+        self.send_started_at = None
 
     def run(self) -> None:
         self.root.mainloop()
