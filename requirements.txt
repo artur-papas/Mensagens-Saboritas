@@ -1,0 +1,2 @@
+Appium-Python-Client>=4.0.0
+emoji>=2.10.0

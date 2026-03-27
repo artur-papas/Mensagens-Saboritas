@@ -1,0 +1,7 @@
+Metadata-Version: 2.4
+Name: mensagens-saboritas
+Version: 0.1.0
+Summary: WhatsApp Business contact collection and message forwarding desktop tool
+Requires-Python: >=3.11
+Requires-Dist: Appium-Python-Client>=4.0.0
+Requires-Dist: emoji>=2.10.0

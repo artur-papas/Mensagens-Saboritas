@@ -1,0 +1,11 @@
+__pycache__/
+.venv/
+*.pyc
+outputs/
+data/generated/
+*.log
+*.tmp
+*.bak
+mensagens_saboritas.json
+configuracao.json
+*.csv

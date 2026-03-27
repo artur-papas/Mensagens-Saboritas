@@ -1,0 +1,26 @@
+{
+  "appium_url": "http://127.0.0.1:4723",
+  "appium_command": ["appium"],
+  "manage_appium_server": false,
+  "device_name": "Android",
+  "whatsapp_package": "com.whatsapp.w4b",
+  "whatsapp_activity": "com.whatsapp.home.ui.HomeActivity",
+  "output_dir": "outputs",
+  "default_batch_size": 1,
+  "blocked_contacts": [
+    "Service Notifications",
+    "WhatsApp Support",
+    "WhatsApp Business",
+    "Payment Notifications",
+    "System Notifications",
+    "Marketing Group",
+    "Broadcast List",
+    "Group Announcements"
+  ],
+  "labels": {
+    "forward": "Encaminhar",
+    "search": "Pesquisar",
+    "send": "Enviar",
+    "back": "Voltar"
+  }
+}

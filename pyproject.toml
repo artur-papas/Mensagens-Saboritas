@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mensagens-saboritas"
+version = "0.1.0"
+description = "WhatsApp Business contact collection and message forwarding desktop tool"
+requires-python = ">=3.11"
+dependencies = [
+    "Appium-Python-Client>=4.0.0",
+    "emoji>=2.10.0",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.scripts]
+mensagens-saboritas = "mensagens_saboritas.main:main"

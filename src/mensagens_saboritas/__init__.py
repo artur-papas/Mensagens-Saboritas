@@ -1,0 +1,1 @@
+"""Mensagens Saboritas application package."""
